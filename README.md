@@ -6,6 +6,10 @@
 
 ---
 
+![SQL Injection GIF](https://miro.medium.com/v2/resize:fit:1240/1*XKqJVWvDsy77fE0AI9Ry1w.gif)
+
+---
+
 ## 🚀 Features
 
 - **SQL Injection Testing**: Automatically tests for common SQL injection vulnerabilities.
