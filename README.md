@@ -1,5 +1,7 @@
 # SQL-RECON 🛡️
 
+## 💌 Teleguard ID: THMYULYWN
+
 **SQL-RECON** is a powerful tool designed to identify SQL Injection vulnerabilities in web applications. It uses a set of predefined payloads to check if a website is susceptible to SQL injections, generating a report with detected vulnerabilities.
 
 > **Disclaimer**: This tool should only be used for ethical penetration testing on systems you have explicit permission to test. Unauthorized use of this tool is illegal and unethical. ⚠️
@@ -70,8 +72,3 @@ Testing payload: ' OR '1'='1
 [+] Report generated: vulnerabilities_report.json
 
 ---
-
-
-## 🙋 Contact
-
-## 💌 Teleguard ID: THMYULYWN
