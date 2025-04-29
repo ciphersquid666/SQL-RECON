@@ -70,5 +70,3 @@ Testing payload: ' OR '1'='1
 [!] Vulnerability found with payload: ' OR '1'='1
 [!] Vulnerable URL: http://example.com/search?query=' OR '1'='1
 [+] Report generated: vulnerabilities_report.json
-
----
